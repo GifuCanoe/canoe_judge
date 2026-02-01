@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>カヌー区間ジャッジ</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>区間ジャッジ</h1>
+
+    <div id="file-setup">
+        <div id="config-panel" style="margin-bottom: 20px;">
+            <p style="margin-bottom: 5px; font-weight: bold;">1. 担当設定を選択してください</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <select id="section-selector" style="font-size: 1.1rem; padding: 10px; width: 45%; border-radius: 8px; border: 2px solid #007bff;">
+                    <option value="1">区間 1</option>
+                    <option value="2">区間 2</option>
+                    <option value="3">区間 3</option>
+                    <option value="4">区間 4</option>
+                    <option value="5">区間 5</option>
+                </select>
+                <select id="round-selector" style="font-size: 1.1rem; padding: 10px; width: 45%; border-radius: 8px; border: 2px solid #28a745;">
+                    <option value="予選">予選</option>
+                    <option value="決勝">決勝</option>
+                </select>
+            </div>
+        </div>
+
+        <p style="margin-bottom: 5px; font-weight: bold;">2. 選手リストを読み込んで開始</p>
+        <label for="bib-file-input" style="cursor: pointer; display: block; padding: 25px; border: 2px dashed #007bff; background: #f0f7ff; border-radius: 10px; margin: 0 10px;">
+            <strong>ここをタップして CSV / TXT を選択</strong>
+        </label>
+        <input type="file" id="bib-file-input" accept=".txt,.csv" style="display: none;">
+    </div>
+
+    <div id="column-headers"></div>
+
+    <div id="arrays-container"></div>
+
+    <div id="navigation-buttons">
+        <button id="prev-array-btn">↑</button>
+        <button id="prev-cell-btn">←</button>
+        <button id="next-cell-btn">→</button>
+        <button id="next-array-btn">↓</button>
+    </div>
+
+    <div id="number-buttons">
+        <button class="number-btn" data-value="0">0</button>
+        <button class="number-btn" data-value="2">2</button>
+        <div class="split-btn-container">
+            <button class="number-btn" data-value="50">50</button>
+            <button id="clear-btn">X</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
