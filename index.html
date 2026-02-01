@@ -7,10 +7,9 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
     <h1>区間ジャッジ</h1>
 
-    <div id="setup-controls" style="display: flex; gap: 10px; margin-bottom: 5px;">
+    <div id="setup-controls" style="display: flex; gap: 10px; margin-bottom: 5px; justify-content: center;">
         <select id="section-selector">
             <option value="1">区間1 (G1-4)</option>
             <option value="2">区間2 (G5-9)</option>
@@ -18,19 +17,18 @@
             <option value="4">区間4 (G13-18)</option>
             <option value="5">区間5 (G19-22)</option>
         </select>
-
         <select id="round-selector">
             <option value="予選">予選</option>
             <option value="決勝">決勝</option>
         </select>
     </div>
 
-    <div id="file-setup">
-        <p>名簿を読み込んでいます...</p>
+    <div id="file-setup" style="text-align:center; padding: 15px; background: #fff; border: 2px solid #ccc; margin: 10px; border-radius: 8px;">
+        <p id="loading-message" style="margin-bottom:10px; font-weight:bold;">名簿を読み込んでください</p>
+        <button id="load-roster-btn" style="padding: 12px 24px; font-size: 1.1em; background: #28a745; color: white; border: none; border-radius: 5px; cursor: pointer;">名簿を同期する</button>
     </div>
 
     <div id="column-headers"></div>
-
     <div id="arrays-container"></div>
 
     <div id="navigation-buttons">
