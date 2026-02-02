@@ -29,12 +29,27 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentInputCellIndex = 2; 
     const NUM_ARRAYS_TO_DISPLAY = 3;
 
-    // 音声ファイルの読み込み（パスに問題がないか確認用）
+    // 音声ファイルの定義
     const sounds = {
         0: new Audio('sound_0.mp3'),
         2: new Audio('sound_2.mp3'),
         50: new Audio('sound_50.mp3')
     };
+
+    // 【重要：スマホ対策】ユーザーが画面を触った瞬間に音声ファイルを「再生可能状態」にする
+    const unlockAudio = () => {
+        Object.values(sounds).forEach(audio => {
+            audio.play().then(() => {
+                audio.pause();
+                audio.currentTime = 0;
+            }).catch(e => console.log("Audio unlock initialized."));
+        });
+        // 一度実行したらイベントを解除
+        document.removeEventListener('touchstart', unlockAudio);
+        document.removeEventListener('click', unlockAudio);
+    };
+    document.addEventListener('touchstart', unlockAudio);
+    document.addEventListener('click', unlockAudio);
 
     function playSound(num) {
         if (num !== null && sounds[num]) {
@@ -43,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const playPromise = sounds[num].play();
             if (playPromise !== undefined) {
                 playPromise.catch(error => {
-                    console.warn("再生ブロック: 画面を一度タップしてください", error);
+                    console.warn("再生失敗:", error);
                 });
             }
         }
@@ -68,7 +83,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateHeaders() {
-        document.querySelector('h1').textContent = `区間${sectionSelector.value} - ${roundSelector.value}`;
+        const titleEl = document.querySelector('h1');
+        if (titleEl) titleEl.textContent = `区間${sectionSelector.value} - ${roundSelector.value}`;
+        
         const headerContainer = document.getElementById('column-headers');
         headerContainer.innerHTML = '';
         const headerRow = document.createElement('div');
@@ -176,7 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (allData[i][j] === 50) cell.classList.add('is-fifty');
                     if (i === currentInputArrayIndex && j === currentInputCellIndex) cell.classList.add('cell-highlight');
                     
-                    // addEventListenerを使用してCSPエラーを回避
+                    // クリックイベントの追加（CSP対応）
                     cell.addEventListener('click', () => {
                         currentInputArrayIndex = i;
                         currentInputCellIndex = j;
@@ -204,6 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderArrays();
     }
 
+    // イベントリスナーの一括設定
     sectionSelector.addEventListener('change', applySelectedSection);
     roundSelector.addEventListener('change', () => { 
         applySelectedSection(); 
