@@ -38,8 +38,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function playSound(num) {
         if (num !== null && sounds[num]) {
+            // 再生位置を最初に戻す
             sounds[num].currentTime = 0;
-            sounds[num].play().catch(() => {});
+            
+            // 再生を実行
+            const playPromise = sounds[num].play();
+
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    // ここでエラーが出た場合、コンソールで確認できます
+                    console.error("音声の再生に失敗しました:", error);
+                });
+            }
         }
     }
 
