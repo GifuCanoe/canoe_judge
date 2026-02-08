@@ -1,11 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- 設定データ ---
     const TOURNAMENT_CONFIG = {
-        1: { startGate: 1,  numGates: 4 },
-        2: { startGate: 5,  numGates: 5 },
-        3: { startGate: 10, numGates: 3 },
-        4: { startGate: 13, numGates: 6 },
-        5: { startGate: 19, numGates: 4 }
+        1: { startGate: 1,  numGates: 3 },
+        2: { startGate: 4,  numGates: 3 },
+        3: { startGate: 7, numGates: 3 },
+        4: { startGate: 10, numGates: 3 },
+        5: { startGate: 13, numGates: 3 }
     };
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbwuRM0A1XT7wnV2vJyBLw75ttmofXXLtLQUbs4pSLjBEyle8BE4vWaQ9vtV244KZR0Y/exec"; 
