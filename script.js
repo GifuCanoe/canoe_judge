@@ -1,13 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- 設定データ ---
-    const TOURNAMENT_CONFIG = {
-        1: { startGate: 1,  numGates: 3 },
-        2: { startGate: 4,  numGates: 3 },
-        3: { startGate: 7, numGates: 3 },
-        4: { startGate: 10, numGates: 3 },
-        5: { startGate: 13, numGates: 3 }
-    };
-
     // --- HTMLから現在のセクション番号を取得 ---
     const currentSection = document.body.getAttribute('data-section') || "1";
 
@@ -58,7 +49,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- 初期設定適用 ---
     function initSettings() {
-        const config = TOURNAMENT_CONFIG[currentSection];
+        const config = APP_CONFIG.TOURNAMENT_CONFIG[currentSection];
+
+        if (!config) {
+            console.error(`区間 ${currentSection} の設定が見つかりません。`);
+            return;
+        }
+
         GATE_START_NUMBER = config.startGate;
         NUM_GATES = config.numGates;
         TOTAL_CELLS_IN_ARRAY = NUM_GATES + 2; 
