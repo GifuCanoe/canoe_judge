@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>カヌースタートシステム</title>
+    <link rel="stylesheet" href="style-start.css">
+</head>
+<body data-section="GOAL">
+    <h1 id="main-title">WWスタート判定</h1>
+
+    <div id="file-setup" class="setup-box">
+        <p id="loading-message">ラウンドを選択してください</p>
+        <div id="round-buttons-container">
+            <button type="button" class="round-toggle-btn" data-round="予選">予選</button>
+            <button type="button" class="round-toggle-btn" data-round="決勝">決勝</button>
+        </div>
+    </div>
+
+    <div id="column-headers"></div>
+    <div id="arrays-container"></div>
+
+    <div id="start-buttons">
+        <button id="start-btn">Start</button>
+        <div class="sub-buttons">
+            <button id="dns-btn">DNS</button>
+            <button id="clear-btn">X</button>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="script-start.js"></script>
+</body>
+</html>

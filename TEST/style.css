@@ -1,0 +1,219 @@
+/* 全体レイアウト */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+}
+
+body { 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+}
+
+h1 { 
+    color: #333; 
+    margin: 5px 0; 
+    font-size: 1.2rem; 
+    flex: 0 0 auto;
+}
+
+/* 設定・同期エリア */
+#file-setup {
+    width: 95%;
+    padding: 8px;
+    border: 2px dashed #ccc;
+    text-align: center;
+    background: #fff;
+    font-size: 0.8rem;
+    margin-bottom: 5px;
+    flex: 0 0 auto;
+}
+
+#round-buttons-container {
+    display: flex;
+    width: 100%;
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.round-toggle-btn {
+    flex: 1;
+    padding: 10px;
+    font-size: 1rem;
+    font-weight: bold;
+    border: 2px solid #ccc;
+    background: #fff;
+    border-radius: 8px;
+}
+
+.round-toggle-btn.active {
+    background: #007bff;
+    color: white;
+}
+
+/* --- 表示エリア（上半分：50%） --- */
+#display-section {
+    flex: 1; 
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+    width: 100%;
+}
+
+#column-headers { 
+    width: 100%; 
+    background-color: #e0e0e0; 
+    border-bottom: 2px solid #ccc; 
+    flex: 0 0 auto;
+}
+
+#arrays-container {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* 行間の隙間 */
+    padding: 2px 0; /* 入力欄上下の余白 */
+    width: 100%;
+    align-items: center;
+}
+
+/* 行のレイアウト：高さも親に合わせる */
+.header-row, .array-row { 
+    display: flex !important; 
+    gap: 5px; 
+    padding: 0 10px; 
+    width: 98%;
+    max-width: 1000px;
+    margin: 0 auto;
+    box-sizing: border-box;
+}
+
+.array-row {
+    flex: 1; /* 行自体も縦に伸びるように設定 */
+    min-height: 60px; /* 潰れすぎ防止 */
+    max-height: 120px; /* 伸びすぎ防止 */
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    background-color: #e0e0e0; 
+    padding: 2px 10px; /* 選手の入力欄間のスペース */
+}
+
+/* セルのレイアウト：フォントサイズをコンテナに合わせる */
+.cell, .header-cell { 
+    flex: 1;
+    height: 100%; /* 親の行の高さに合わせる */
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    border-radius: 5px; 
+    border: 1px solid #555; 
+    background-color: white; 
+    box-sizing: border-box;
+    
+    /* コンテナクエリの準備 */
+    container-type: size; 
+}
+
+.cell {
+    font-size: 2em !important; /* 枠の高さに合わせ文字サイズ調整 */
+    font-weight: bold;
+    /* 文字が枠をはみ出さないための保護設定 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.header-cell {
+    border: none;
+    background-color: #e0e0e0 !important;
+    font-size: 1.2em; /* 高さに合わせ文字サイズ調整、ゲート番号 */
+    height: 40px;
+}
+
+.array-number-cell { 
+    flex: 1.5 !important;
+    background-color: #d1e7dd; 
+    font-size: 1.2em; /* 高さに合わせ文字サイズ調整、CategoryとBib*/
+    overflow: hidden; 
+    text-overflow: ellipsis; 
+    white-space: nowrap; 
+}
+
+/* --- 操作エリア（下半分：50%） --- */
+#controls-section {
+    height: 50vh; 
+    display: flex; 
+    flex-direction: column; 
+    width: 100%;
+    background: #eee; 
+    border-top: 1px solid #ccc; 
+    padding: 10px; 
+    box-sizing: border-box;
+    flex: 0 0 auto;
+}
+
+#navigation-buttons { 
+    display: flex; 
+    justify-content: center; 
+    margin-bottom: 10px;
+}
+
+#navigation-buttons button { 
+    width: 65px; 
+    height: 50px; 
+    font-size: 1.8rem; 
+    margin: 0 5px; 
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 8px; 
+}
+
+#number-buttons { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 8px; 
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.number-btn, #clear-btn { 
+    width: 100%; 
+    border-radius: 12px; 
+    font-weight: bold; 
+    border: none; 
+}
+
+.split-btn-container { 
+    display: flex; 
+    gap: 8px; 
+    flex: 1.2;
+}
+
+/* ボタンのカラー設定 */
+.number-btn[data-value="0"] { flex: 3; background: #28a745; color: white; font-size: 3rem; }
+.number-btn[data-value="2"] { flex: 2; background: yellow; color: black; font-size: 2.5rem; }
+.number-btn[data-value="50"] { flex: 1; background: red; color: white; font-size: 1.8rem; }
+#clear-btn { flex: 1; background: #666; color: white; font-size: 1.8rem; }
+
+/* カテゴリーカラー */
+.cat-mk1 { background-color: #007bff !important; color: white !important; }
+.cat-wk1 { background-color: #a333c8 !important; color: white !important; }
+.cat-mc1 { background-color: #5bc0de !important; color: black !important; }
+.cat-wc1 { background-color: #f0ad4e !important; color: black !important; }
+
+/* 状態表示 */
+.cell-highlight { border: 4px solid red !important; }
+.cell.is-two { background-color: yellow; }
+.cell.is-fifty { background-color: red; color: white; }
+
+button:disabled { opacity: 0.3; }
