@@ -31,7 +31,57 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 初期設定適用[cite: 2] ---
+    // --- バックアップ機能 (スタート/ゴール方式を適用) ---
+
+    // 1. 保存
+    function saveToLocalStorage() {
+        if (!currentRound) return;
+        const storageKey = `canoe_judge_backup_${currentSection}`;
+        const backupData = {
+            round: currentRound,
+            allData: allData,
+            currentInputArrayIndex: currentInputArrayIndex,
+            currentInputCellIndex: currentInputCellIndex,
+            TOTAL_ARRAYS: TOTAL_ARRAYS
+        };
+        localStorage.setItem(storageKey, JSON.stringify(backupData));
+    }
+
+    // 2. 復元 (起動時に呼び出し)
+    function checkBackup() {
+        const storageKey = `canoe_judge_backup_${currentSection}`;
+        const saved = localStorage.getItem(storageKey);
+        if (saved) {
+            try {
+                const backup = JSON.parse(saved);
+                // の方式で確認ダイアログを表示
+                if (confirm(`前回の「${backup.round}」の入力データが残っています。復元しますか？\n（キャンセルすると新しい名簿を取得できます）`)) {
+                    currentRound = backup.round;
+                    allData = backup.allData;
+                    currentInputArrayIndex = backup.currentInputArrayIndex;
+                    currentInputCellIndex = backup.currentInputCellIndex;
+                    TOTAL_ARRAYS = backup.TOTAL_ARRAYS;
+                    
+                    // 復元後の表示処理
+                    fileSetupDiv.style.display = 'none';
+                    document.getElementById('main-title').textContent = `区間${currentSection} - ${currentRound}`;
+                    renderArrays(true);
+                    
+                    // 対応するラウンドボタンをアクティブにする
+                    roundBtns.forEach(btn => {
+                        if (btn.dataset.round === currentRound) btn.classList.add('active');
+                    });
+                } else {
+                    // キャンセル時は古いバックアップを削除
+                    localStorage.removeItem(storageKey);
+                }
+            } catch (e) {
+                console.error("Backup parse error", e);
+            }
+        }
+    }
+
+    // --- 初期設定適用 ---
     function initSettings() {
         const config = APP_CONFIG.TOURNAMENT_CONFIG[currentSection];
         if (!config) return;
@@ -63,8 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
         headerContainer.appendChild(headerRow);
     }
 
-    // --- データ通信[cite: 2] ---
+    // --- データ通信 ---
     async function fetchAndSetupRoster(roundName) {
+        // 新しく取得する場合はバックアップを一度クリア
+        localStorage.removeItem(`canoe_judge_backup_${currentSection}`);
+        
         currentRound = roundName;
         document.getElementById('main-title').textContent = `区間${currentSection} - ${currentRound}`;
         const fetchUrl = `${APP_CONFIG.GAS_URL}?round=${encodeURIComponent(currentRound)}`;
@@ -83,7 +136,9 @@ document.addEventListener('DOMContentLoaded', () => {
             fileSetupDiv.style.display = 'none';
             currentInputArrayIndex = 0;
             currentInputCellIndex = 2;
-            renderArrays(true); // 初回はスクロールさせる
+            
+            renderArrays(true);
+            saveToLocalStorage(); // 取得直後の状態をバックアップ
         } catch (err) {
             loadingMessage.innerHTML = `<span style="color:red;">名簿取得に失敗しました</span>`;
         }
@@ -106,7 +161,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error("同期失敗:", err); }
     }
 
-    // --- 入力・表示[cite: 2, 4] ---
+    // --- 入力・表示 ---
     function inputData(num) {
         if (allData.length === 0) return;
         allData[currentInputArrayIndex][currentInputCellIndex] = num;
@@ -119,7 +174,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentInputArrayIndex++;
             }
         }
-        renderArrays(true); // 入力時は追従スクロールを有効にする
+        renderArrays(true);
+        saveToLocalStorage(); // 入力ごとに保存
         syncToGoogleSheets();
     }
 
@@ -153,7 +209,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     cell.onclick = () => { 
                         currentInputArrayIndex = i; 
                         currentInputCellIndex = j; 
-                        renderArrays(false); // 手動選択時は自動スクロールさせない
+                        renderArrays(false);
+                        saveToLocalStorage(); // フォーカス位置の変更も保存
                     };
                 }
                 row.appendChild(cell);
@@ -161,7 +218,6 @@ document.addEventListener('DOMContentLoaded', () => {
             arraysContainer.appendChild(row);
         }
 
-        // 自動追従スクロール
         if (shouldScroll) {
             const activeRow = document.getElementById('active-row');
             if (activeRow) {
@@ -181,6 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (currentInputArrayIndex < TOTAL_ARRAYS - 1) { currentInputArrayIndex++; currentInputCellIndex = 2; }
         }
         renderArrays(true);
+        saveToLocalStorage(); // フォーカス位置の変更も保存
     }
 
     // --- イベント設定 ---
@@ -197,5 +254,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     clearBtn.onclick = () => inputData(null);
 
+    // 初期化：設定適用とバックアップチェック
     initSettings();
+    checkBackup();
 });
