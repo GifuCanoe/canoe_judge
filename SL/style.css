@@ -3,7 +3,7 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    overflow: hidden;
+    overflow: hidden; /* 画面全体が揺れるのを防ぐ */
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
 }
@@ -55,35 +55,42 @@ h1 {
     color: white;
 }
 
-/* --- 表示エリア（上半分：50%） --- */
+/* --- 表示エリア（上半分） --- */
 #display-section {
-    flex: 1; 
+    flex: 0 0 272px; /* 3選手分 + ヘッダーが収まる高さに固定 */
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: hidden; /* 外枠は固定 */
     background: #fff;
     width: 100%;
+    border-bottom: 2px solid #ccc;
 }
 
 #column-headers { 
     width: 100%; 
     background-color: #e0e0e0; 
+    padding: 2px 0;
     border-bottom: 2px solid #ccc; 
-    flex: 0 0 auto;
+    display: flex;
+    justify-content: center;
+    /* flex: 0 0 auto; */
+    padding-right: 16px; /* スクロールバー分の余白 */
+    box-sizing: border-box;
 }
 
 #arrays-container {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: auto !important; /* マウスホイールを有効化 */
+    -webkit-overflow-scrolling: touch; 
     display: flex;
     flex-direction: column;
-    gap: 4px; /* 行間の隙間 */
-    padding: 2px 0; /* 入力欄上下の余白 */
+    gap: 6px;
+    padding: 5px 0;
     width: 100%;
     align-items: center;
 }
 
-/* 行のレイアウト：高さも親に合わせる */
+/* 行のレイアウト */
 .header-row, .array-row { 
     display: flex !important; 
     gap: 5px; 
@@ -95,19 +102,17 @@ h1 {
 }
 
 .array-row {
-    flex: 1; /* 行自体も縦に伸びるように設定 */
-    min-height: 60px; /* 潰れすぎ防止 */
-    max-height: 120px; /* 伸びすぎ防止 */
+    flex: 0 0 70px; /* 1行の高さを固定 */
     border: 1px solid #ccc; 
     border-radius: 8px; 
     background-color: #e0e0e0; 
-    padding: 2px 10px; /* 選手の入力欄間のスペース */
+    padding: 2px 10px;
 }
 
-/* セルのレイアウト：フォントサイズをコンテナに合わせる */
+/* セルのレイアウト */
 .cell, .header-cell { 
     flex: 1;
-    height: 100%; /* 親の行の高さに合わせる */
+    height: 100%; 
     display: flex; 
     justify-content: center; 
     align-items: center; 
@@ -115,54 +120,46 @@ h1 {
     border: 1px solid #555; 
     background-color: white; 
     box-sizing: border-box;
-    
-    /* コンテナクエリの準備 */
-    container-type: size; 
 }
 
 .cell {
-    font-size: 2em !important; /* 枠の高さに合わせ文字サイズ調整 */
+    font-size: 2em !important; 
     font-weight: bold;
-    /* 文字が枠をはみ出さないための保護設定 */
-    display: flex;
-    justify-content: center;
-    align-items: center;
     overflow: hidden;
 }
 
 .header-cell {
     border: none;
     background-color: #e0e0e0 !important;
-    font-size: 1.2em; /* 高さに合わせ文字サイズ調整、ゲート番号 */
-    height: 40px;
+    font-size: 1.1em;
+    height: 35px;
 }
 
 .array-number-cell { 
     flex: 1.5 !important;
     background-color: #d1e7dd; 
-    font-size: 1.2em; /* 高さに合わせ文字サイズ調整、CategoryとBib*/
+    font-size: 1.1em;
     overflow: hidden; 
     text-overflow: ellipsis; 
     white-space: nowrap; 
 }
 
-/* --- 操作エリア（下半分：50%） --- */
+/* --- 操作エリア（下半分） --- */
 #controls-section {
-    height: 50vh; 
+    flex: 1; /* 残りのスペースをすべて使う */
     display: flex; 
     flex-direction: column; 
     width: 100%;
     background: #eee; 
-    border-top: 1px solid #ccc; 
     padding: 10px; 
     box-sizing: border-box;
-    flex: 0 0 auto;
 }
 
 #navigation-buttons { 
     display: flex; 
     justify-content: center; 
     margin-bottom: 10px;
+    flex: 0 0 auto;
 }
 
 #navigation-buttons button { 
@@ -180,7 +177,7 @@ h1 {
     flex: 1; 
     display: flex; 
     flex-direction: column; 
-    gap: 8px; 
+    gap: 10px;  /* ボタン間の隙間 */
     width: 100%;
     max-width: 600px;
     margin: 0 auto;
@@ -205,7 +202,7 @@ h1 {
 .number-btn[data-value="50"] { flex: 1; background: red; color: white; font-size: 1.8rem; }
 #clear-btn { flex: 1; background: #666; color: white; font-size: 1.8rem; }
 
-/* カテゴリーカラー */
+/* カテゴリーカラー[cite: 4] */
 .cat-mk1 { background-color: #007bff !important; color: white !important; }
 .cat-wk1 { background-color: #a333c8 !important; color: white !important; }
 .cat-mc1 { background-color: #5bc0de !important; color: black !important; }
