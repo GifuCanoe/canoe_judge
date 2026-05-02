@@ -1,4 +1,4 @@
-// 全システム共通の設定
+// 全システム共通の設定_WW用
 const APP_CONFIG = {
-    GAS_URL: "https://script.google.com/macros/s/AKfycbxHQOG89fjy0F9WcHNlGZeyx5_0E0J0ByX9sBKvN5i9FEX4BY9yzy27OwsRBHjVk2HP/exec"
+    GAS_URL: "https://script.google.com/macros/s/AKfycbzUMIuxzKMShkivASjDXXD5efpNYPprXe4zS2Fe8KeuK0JuiH7aeFqZgRgThi7A0mQsyQ/exec"
 };
