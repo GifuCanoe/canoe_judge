@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- HTMLから現在のセクション番号を取得 ---
     const currentSection = document.body.getAttribute('data-section') || "1";
 
     // --- 要素の取得 ---
@@ -7,10 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const roundBtns = document.querySelectorAll('.round-toggle-btn');
     const fileSetupDiv = document.getElementById('file-setup');
     const loadingMessage = document.getElementById('loading-message');
-    const prevArrayBtn = document.getElementById('prev-array-btn');
-    const nextArrayBtn = document.getElementById('next-array-btn');
-    const prevCellBtn = document.getElementById('prev-cell-btn');
-    const nextCellBtn = document.getElementById('next-cell-btn');
     const clearBtn = document.getElementById('clear-btn');
 
     // --- 状態管理変数 ---
@@ -19,8 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let TOTAL_ARRAYS = 0;
     let currentInputArrayIndex = 0; 
     let currentInputCellIndex = 2; 
-    let currentRound = ""; // 最初は未選択
-    const NUM_ARRAYS_TO_DISPLAY = 3;
+    let currentRound = ""; 
 
     // --- 音声処理 ---
     const sounds = {
@@ -28,16 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
         2: new Audio('sound_2.mp3'),
         50: new Audio('sound_50.mp3')
     };
-
-    const unlockAudio = () => {
-        Object.values(sounds).forEach(audio => {
-            audio.play().then(() => { audio.pause(); audio.currentTime = 0; }).catch(e => {});
-        });
-        document.removeEventListener('touchstart', unlockAudio);
-        document.removeEventListener('click', unlockAudio);
-    };
-    document.addEventListener('touchstart', unlockAudio);
-    document.addEventListener('click', unlockAudio);
 
     function playSound(num) {
         if (num !== null && sounds[num]) {
@@ -47,14 +31,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // --- 初期設定適用 ---
+    // --- 初期設定適用[cite: 2] ---
     function initSettings() {
         const config = APP_CONFIG.TOURNAMENT_CONFIG[currentSection];
-
-        if (!config) {
-            console.error(`区間 ${currentSection} の設定が見つかりません。`);
-            return;
-        }
+        if (!config) return;
 
         GATE_START_NUMBER = config.startGate;
         NUM_GATES = config.numGates;
@@ -83,18 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
         headerContainer.appendChild(headerRow);
     }
 
-    // --- データ通信（ラウンド選択時に実行される） ---
+    // --- データ通信[cite: 2] ---
     async function fetchAndSetupRoster(roundName) {
         currentRound = roundName;
         document.getElementById('main-title').textContent = `区間${currentSection} - ${currentRound}`;
-        
         const fetchUrl = `${APP_CONFIG.GAS_URL}?round=${encodeURIComponent(currentRound)}`;
         try {
-            // UI状態のリセット
             loadingMessage.textContent = `${currentRound}の名簿を取得中...`;
-            allData = [];
-            arraysContainer.innerHTML = '';
-            
             const response = await fetch(fetchUrl);
             const list = await response.json(); 
             if (!list || list.length === 0 || list.error) throw new Error("データなし");
@@ -105,15 +80,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 return row;
             });
             TOTAL_ARRAYS = allData.length;
-            
-            // 取得成功したら同期エリアを隠す（またはメッセージ変更）
             fileSetupDiv.style.display = 'none';
             currentInputArrayIndex = 0;
             currentInputCellIndex = 2;
-            renderArrays();
+            renderArrays(true); // 初回はスクロールさせる
         } catch (err) {
-            console.error(err);
-            loadingMessage.innerHTML = `<span style="color:red;">${currentRound}名簿の取得に失敗しました</span>`;
+            loadingMessage.innerHTML = `<span style="color:red;">名簿取得に失敗しました</span>`;
         }
     }
 
@@ -134,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) { console.error("同期失敗:", err); }
     }
 
-    // --- 入力・表示・フォーカス移動 ---
+    // --- 入力・表示[cite: 2, 4] ---
     function inputData(num) {
         if (allData.length === 0) return;
         allData[currentInputArrayIndex][currentInputCellIndex] = num;
@@ -147,20 +119,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 currentInputArrayIndex++;
             }
         }
-        renderArrays();
+        renderArrays(true); // 入力時は追従スクロールを有効にする
         syncToGoogleSheets();
     }
 
-    function renderArrays() {
+    function renderArrays(shouldScroll = false) {
         if (allData.length === 0) return;
         arraysContainer.innerHTML = '';
-        let start = Math.max(0, currentInputArrayIndex - 1);
-        if (start + NUM_ARRAYS_TO_DISPLAY > TOTAL_ARRAYS) start = Math.max(0, TOTAL_ARRAYS - NUM_ARRAYS_TO_DISPLAY);
-        const end = Math.min(start + NUM_ARRAYS_TO_DISPLAY, TOTAL_ARRAYS);
 
-        for (let i = start; i < end; i++) {
+        for (let i = 0; i < TOTAL_ARRAYS; i++) {
             const row = document.createElement('div');
             row.className = 'array-row';
+            if (i === currentInputArrayIndex) row.id = 'active-row';
+
             for (let j = 0; j < TOTAL_CELLS_IN_ARRAY; j++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
@@ -179,14 +150,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (allData[i][j] === 2) cell.classList.add('is-two');
                     if (allData[i][j] === 50) cell.classList.add('is-fifty');
                     if (i === currentInputArrayIndex && j === currentInputCellIndex) cell.classList.add('cell-highlight');
-                    cell.onclick = () => { currentInputArrayIndex = i; currentInputCellIndex = j; renderArrays(); };
+                    cell.onclick = () => { 
+                        currentInputArrayIndex = i; 
+                        currentInputCellIndex = j; 
+                        renderArrays(false); // 手動選択時は自動スクロールさせない
+                    };
                 }
                 row.appendChild(cell);
             }
             arraysContainer.appendChild(row);
         }
-        prevArrayBtn.disabled = currentInputArrayIndex === 0;
-        nextArrayBtn.disabled = currentInputArrayIndex === TOTAL_ARRAYS - 1;
+
+        // 自動追従スクロール
+        if (shouldScroll) {
+            const activeRow = document.getElementById('active-row');
+            if (activeRow) {
+                activeRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
     }
 
     function moveFocus(dir) {
@@ -199,7 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentInputCellIndex < TOTAL_CELLS_IN_ARRAY - 1) currentInputCellIndex++;
             else if (currentInputArrayIndex < TOTAL_ARRAYS - 1) { currentInputArrayIndex++; currentInputCellIndex = 2; }
         }
-        renderArrays();
+        renderArrays(true);
     }
 
     // --- イベント設定 ---
@@ -207,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => {
             roundBtns.forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            fetchAndSetupRoster(btn.dataset.round); // ボタンクリックで即同期開始
+            fetchAndSetupRoster(btn.dataset.round);
         };
     });
 
@@ -215,10 +196,6 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.onclick = () => inputData(parseInt(btn.dataset.value));
     });
     clearBtn.onclick = () => inputData(null);
-    prevArrayBtn.onclick = () => moveFocus('prevArray');
-    nextArrayBtn.onclick = () => moveFocus('nextArray');
-    prevCellBtn.onclick = () => moveFocus('prevCell');
-    nextCellBtn.onclick = () => moveFocus('nextCell');
 
     initSettings();
 });
