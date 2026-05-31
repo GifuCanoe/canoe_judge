@@ -10,17 +10,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const loadingMessage = document.getElementById('loading-message');
 
     // --- 音声設定 ---
-    const soundFinish = new Audio('sound_0.mp3');
-    const soundDNF = new Audio('sound_2.mp3');
+    const soundStart = new Audio('sound_0.mp3');
+    const soundDNS = new Audio('sound_2.mp3');
     let isAudioUnlocked = false;
 
     const unlockAudio = () => {
         if (isAudioUnlocked) return;
-        const fPromise = soundFinish.play();
-        const dPromise = soundDNF.play();
-        Promise.all([fPromise, dPromise]).then(() => {
-            soundFinish.pause(); soundFinish.currentTime = 0;
-            soundDNF.pause();    soundDNF.currentTime = 0;
+        const sPromise = soundStart.play();
+        const dPromise = soundDNS.play();
+        Promise.all([sPromise, dPromise]).then(() => {
+            soundStart.pause(); soundStart.currentTime = 0;
+            soundDNS.pause();    soundDNS.currentTime = 0;
             isAudioUnlocked = true;
             console.log("Audio Unlocked");
         }).catch(e => console.log("Audio waiting..."));
@@ -39,12 +39,12 @@ document.addEventListener('DOMContentLoaded', () => {
             data: allData,
             index: currentInputArrayIndex
         };
-        localStorage.setItem('canoe_goal_backup', JSON.stringify(backup));
+        localStorage.setItem('canoe_start_backup', JSON.stringify(backup));
     }
 
     // 2. ローカルから復元（起動時にチェック）
     function checkBackup() {
-        const saved = localStorage.getItem('canoe_goal_backup');
+        const saved = localStorage.getItem('canoe_start_backup');
         if (saved) {
             try {
                 const backup = JSON.parse(saved);
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('file-setup').style.display = 'none';
                 } else {
                     // キャンセルされた場合は古いバックアップを破棄
-                    localStorage.removeItem('canoe_goal_backup');
+                    localStorage.removeItem('canoe_start_backup');
                 }
             } catch (e) {
                 console.error("Backup parse error", e);
@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 名簿取得
     async function fetchRoster(roundName) {
         // 新しく名簿を取る際は、古いバックアップを消去
-        localStorage.removeItem('canoe_goal_backup');
+        localStorage.removeItem('canoe_start_backup');
         
         currentRound = roundName;
         loadingMessage.textContent = `${roundName}の名簿を取得中...`;
@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 記録処理
-    function recordGoal(type) {
+    function recordStart(type) {
         if (allData.length === 0) return;
 
         // 現在時刻（ミリ秒）を取得
@@ -114,12 +114,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (type === 'START') {
             allData[currentInputArrayIndex][2] = getTimestamp();
-            soundFinish.currentTime = 0;
-            soundFinish.play().catch(e => console.error("Sound error:", e));
+            soundStart.currentTime = 0;
+            soundStart.play().catch(e => console.error("Sound error:", e));
         } else if (type === 'DNS') {
             allData[currentInputArrayIndex][2] = 'DNS';
-            soundDNF.currentTime = 0;
-            soundDNF.play().catch(e => console.error("Sound error:", e));
+            soundDNS.currentTime = 0;
+            soundDNS.play().catch(e => console.error("Sound error:", e));
         } else if (type === 'CLEAR') {
             allData[currentInputArrayIndex][2] = null;
         }
@@ -207,9 +207,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ボタンイベント登録
     roundBtns.forEach(btn => btn.onclick = () => fetchRoster(btn.dataset.round));
-    document.getElementById('start-btn').onclick = () => recordGoal('START');
-    document.getElementById('dns-btn').onclick = () => recordGoal('DNS');
-    document.getElementById('clear-btn').onclick = () => recordGoal('CLEAR');
+    document.getElementById('start-btn').onclick = () => recordStart('START');
+    document.getElementById('dns-btn').onclick = () => recordStart('DNS');
+    document.getElementById('clear-btn').onclick = () => recordStart('CLEAR');
 
     // ヘッダー生成
     const hc = document.getElementById('column-headers');
@@ -217,7 +217,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="header-row">
             <div class="header-cell cat-cell">Category</div>
             <div class="header-cell bib-cell">Bib</div>
-            <div class="header-cell time-cell">Goal Time</div>
+            <div class="header-cell time-cell">Start Time</div>
         </div>`;
 
     // --- キーボード操作の対応 ---
@@ -227,12 +227,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const key = event.key.toUpperCase(); // 押しやすくするため大文字小文字を区別しない
 
-        if (key === 'G') {
-            recordGoal('START');
+        if (key === 'S') {
+            recordStart('START');
         } else if (key === 'D') {
-            recordGoal('DNS');
+            recordStart('DNS');
         } else if (key === 'C') {
-            recordGoal('CLEAR');
+            recordStart('CLEAR');
         }
     });
 
