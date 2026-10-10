@@ -6,8 +6,8 @@ const APP_CONFIG = {
     // 区間ごとのゲート設定（ここを編集するだけでOK）
     TOURNAMENT_CONFIG: {
         1: { startGate: 1,  numGates: 5 },
-        2: { startGate: 6,  numGates: 4 },
-        3: { startGate: 10, numGates: 4 },
+        2: { startGate: 6,  numGates: 5 },
+        3: { startGate: 11, numGates: 3 },
         4: { startGate: 14, numGates: 3 },
         5: { startGate: 17, numGates: 4 }
     }
