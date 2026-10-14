@@ -1,6 +1,6 @@
 // 全システム共通の設定_SL用
 const APP_CONFIG = {
-    GAS_URL: "https://script.google.com/macros/s/AKfycbx3zNaU-DZSc18lndI5InCtzYFqyrx19HR-LWYdh0VKFKlBfI9Tr2plw6Niro-l83zUDA/exec",
+    GAS_URL: "https://script.google.com/macros/s/AKfycbxoz84pPElGG6OsVZHMGZuhZuEWvo0qwF3KBFk67lFaIQc3LcgoyfrC2hU6kIJIhwT5/exec",
 
     // 区間ごとのゲート設定（ここを編集するだけでOK）
     TOURNAMENT_CONFIG: {
