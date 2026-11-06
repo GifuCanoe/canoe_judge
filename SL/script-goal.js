@@ -207,6 +207,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.textContent = val || '';
                 row.appendChild(cell);
             });
+
+            // タイムセルの右側に「手動入力・修正用ボタン」を配置
+            const editCell = document.createElement('div');
+            editCell.className = 'cell edit-btn-cell';
+            
+            const editBtn = document.createElement('button');
+            editBtn.className = 'row-edit-btn';
+            editBtn.textContent = '✎';
+            editBtn.title = 'この行の時刻を手動入力・修正';
+            
+            editBtn.onclick = (e) => {
+                e.stopPropagation(); // 行選択イベントへの伝播を防ぐ
+                currentInputArrayIndex = i; // その行を選択状態にする
+                
+                const currentVal = rowValues[2] || '';
+                const input = prompt(
+                    `【Bib ${rowValues[1]}】のゴール時刻を手動入力・修正してください\n(例: 12:34:56.78、または DNS / DNF / 空欄にしてOK)`, 
+                    currentVal
+                );
+
+                if (input !== null) { 
+                    const trimmed = input.trim();
+                    allData[i][2] = trimmed === '' ? null : trimmed;
+                    render();
+                    saveBackup();
+                    sync(); 
+                }
+            };
+
+            editCell.appendChild(editBtn);
+            row.appendChild(editCell);
+
             arraysContainer.appendChild(row);
         });
 
@@ -223,12 +255,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dnf-btn').onclick = () => recordGoal('DNF');
     document.getElementById('clear-btn').onclick = () => recordGoal('CLEAR');
 
+    // ヘッダー生成（右側に編集ボタン用の幅50pxのダミーセルを配置）
     const hc = document.getElementById('column-headers');
     hc.innerHTML = `
         <div class="header-row">
             <div class="header-cell cat-cell">Category</div>
             <div class="header-cell bib-cell">Bib</div>
             <div class="header-cell time-cell">Goal Time</div>
+            <div class="header-cell edit-btn-cell" style="background: transparent !important; border: none; width: 50px; flex-shrink: 0;"></div>
         </div>`;
 
     document.addEventListener('keydown', (event) => {

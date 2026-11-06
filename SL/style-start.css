@@ -39,7 +39,7 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
 
 /* --- リスト表示エリアの構造 --- */
 
-/* ヘッダーコンテナ：中央寄せにしつつ、スクロールバー分の余白を予約 */
+/* ヘッダーコンテナ：右側の編集ボタン分のスペース（50px+隙間）を考慮して右パディング調整 */
 #column-headers { 
     width: 100%; 
     background: #000; 
@@ -47,8 +47,7 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
     border-bottom: 1px solid #444; 
     display: flex;
     justify-content: center;
-    /* 数値入力してタイトルとの並びを調整 */
-    padding-right: 16px;
+    padding-right: 20px; /* 編集ボタン分のバランス調整 */
     box-sizing: border-box;
 }
 
@@ -66,13 +65,13 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
 .header-row, .array-row { 
     display: flex; 
     justify-content: center; 
-    gap: 12px;
+    gap: 8px; /* 少しコンパクトに調整 */
     width: 100%;
     padding: 4px 0;
     box-sizing: border-box;
 }
 
-/* --- セルの基本デザインと固定幅（広めに設定） --- */
+/* --- セルの基本デザインと固定幅 --- */
 .cell, .header-cell { 
     display: flex; 
     align-items: center; 
@@ -83,10 +82,10 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
     flex-shrink: 0; 
 }
 
-/* 各列の幅を広めに固定 */
+/* 各列の幅 */
 .cat-cell { width: 110px; }
 .bib-cell { width: 90px; }
-.time-cell { width: 240px; } /* ゴール時刻を広く確保 */
+.time-cell { width: 240px; } 
 
 /* ヘッダー固有 */
 .header-cell { 
@@ -115,6 +114,32 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
     color: #000; 
     font-family: monospace; 
     border: 1px solid #ffe58f; 
+}
+
+/* --- 手動編集ボタン用セルおよびボタンのスタイル --- */
+.edit-btn-cell {
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-edit-btn {
+    width: 40px;
+    height: 40px;
+    background: #444;
+    color: #fff;
+    border: 1px solid #666;
+    border-radius: 6px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-edit-btn:active {
+    background: #666;
 }
 
 /* --- 特殊状態・カテゴリーカラー --- */
