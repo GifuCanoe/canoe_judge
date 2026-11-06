@@ -3,24 +3,24 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentInputArrayIndex = 0;
     let currentRound = "";
     let lastRecordTime = 0;
-    const CHATTERING_DELAY = 500;   //チャタリング防止時間（ミリ秒）　500で0.5秒
+    const CHATTERING_DELAY = 500;   //チャタリング防止時間（ミリ秒） 500で0.5秒
 
     const arraysContainer = document.getElementById('arrays-container');
     const roundBtns = document.querySelectorAll('.round-toggle-btn');
     const loadingMessage = document.getElementById('loading-message');
 
     // --- 音声設定 ---
-    const soundFinish = new Audio('sound_0.mp3');
-    const soundDNF = new Audio('sound_2.mp3');
+    const soundStart = new Audio('sound_0.mp3');
+    const soundDNS = new Audio('sound_2.mp3');
     let isAudioUnlocked = false;
 
     const unlockAudio = () => {
         if (isAudioUnlocked) return;
-        const fPromise = soundFinish.play();
-        const dPromise = soundDNF.play();
-        Promise.all([fPromise, dPromise]).then(() => {
-            soundFinish.pause(); soundFinish.currentTime = 0;
-            soundDNF.pause();    soundDNF.currentTime = 0;
+        const sPromise = soundStart.play();
+        const dPromise = soundDNS.play();
+        Promise.all([sPromise, dPromise]).then(() => {
+            soundStart.pause(); soundStart.currentTime = 0;
+            soundDNS.pause();    soundDNS.currentTime = 0;
             isAudioUnlocked = true;
             console.log("Audio Unlocked");
         }).catch(e => console.log("Audio waiting..."));
@@ -104,22 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
         // CLEAR（修正）以外の場合で、前回の記録から設定時間以内なら無視する
         if (type !== 'CLEAR') {
             if (now - lastRecordTime < CHATTERING_DELAY) {
-                console.log("Chattering prevented"); // ログに表示（確認用）
+                console.log("Chattering prevented"); 
                 return; 
             }
-            // 記録時間を更新
             lastRecordTime = now;
         }
-        // 以上チャタリング対策用コード
 
         if (type === 'START') {
             allData[currentInputArrayIndex][2] = getTimestamp();
-            soundFinish.currentTime = 0;
-            soundFinish.play().catch(e => console.error("Sound error:", e));
+            soundStart.currentTime = 0;
+            soundStart.play().catch(e => console.error("Sound error:", e));
         } else if (type === 'DNS') {
             allData[currentInputArrayIndex][2] = 'DNS';
-            soundDNF.currentTime = 0;
-            soundDNF.play().catch(e => console.error("Sound error:", e));
+            soundDNS.currentTime = 0;
+            soundDNS.play().catch(e => console.error("Sound error:", e));
         } else if (type === 'CLEAR') {
             allData[currentInputArrayIndex][2] = null;
         }
@@ -146,7 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         render();
-        saveBackup(); // 記録するたびに保存
+        saveBackup(); 
         sync();
     }
 
@@ -172,10 +170,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const row = document.createElement('div');
             row.className = `array-row ${i === currentInputArrayIndex ? 'active-row' : ''}`;
             row.id = `row-${i}`;
+            
+            // 行全体をクリックしたときは「選択（フォーカス移動）」のみ
             row.onclick = () => { 
                 currentInputArrayIndex = i; 
                 render(); 
-                saveBackup(); // 選択位置の変更も保存
+                saveBackup(); 
             };
 
             rowValues.forEach((val, j) => {
@@ -193,6 +193,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.textContent = val || '';
                 row.appendChild(cell);
             });
+
+            // タイムセルの右側に「手動入力・修正用ボタン」を配置
+            const editCell = document.createElement('div');
+            editCell.className = 'cell edit-btn-cell';
+            
+            const editBtn = document.createElement('button');
+            editBtn.className = 'row-edit-btn';
+            editBtn.textContent = '✎';
+            editBtn.title = 'この行の時刻を手動入力・修正';
+            
+            editBtn.onclick = (e) => {
+                e.stopPropagation(); // 行選択イベントへのバブリングを防ぐ
+                currentInputArrayIndex = i; // その行を選択状態にする
+                
+                const currentVal = rowValues[2] || '';
+                const input = prompt(
+                    `【Bib ${rowValues[1]}】のスタート時刻を手動入力・修正してください\n(例: 12:34:56.78、または DNS / 空欄にしてOK)`, 
+                    currentVal
+                );
+
+                if (input !== null) { 
+                    const trimmed = input.trim();
+                    allData[i][2] = trimmed === '' ? null : trimmed;
+                    render();
+                    saveBackup();
+                    sync(); 
+                }
+            };
+
+            editCell.appendChild(editBtn);
+            row.appendChild(editCell);
+
             arraysContainer.appendChild(row);
         });
 
@@ -211,23 +243,23 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('dns-btn').onclick = () => recordStart('DNS');
     document.getElementById('clear-btn').onclick = () => recordStart('CLEAR');
 
-    // ヘッダー生成
+    // ヘッダー生成（右側の編集ボタン分の列を追加）
     const hc = document.getElementById('column-headers');
     hc.innerHTML = `
         <div class="header-row">
             <div class="header-cell cat-cell">Category</div>
             <div class="header-cell bib-cell">Bib</div>
             <div class="header-cell time-cell">Start Time</div>
+            <div class="header-cell edit-btn-cell" style="background:transparent !important; border:none; width: 50pz; flex-shrink: 0;"></div>
         </div>`;
 
     // --- キーボード操作の対応 ---
     document.addEventListener('keydown', (event) => {
-        // 入力中の誤動作を防ぐため、もし他にテキスト入力などがあれば除外する（今回は不要ですが念のため）
         if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
 
-        const key = event.key.toUpperCase(); // 押しやすくするため大文字小文字を区別しない
+        const key = event.key.toUpperCase();
 
-        if (key === 'G') {
+        if (key === 'S') {
             recordStart('START');
         } else if (key === 'D') {
             recordStart('DNS');
