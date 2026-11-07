@@ -1,0 +1,164 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: sans-serif;
+  background-color: #1a1a1a;
+  color: #fff;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* 画面上部：時計表示エリア */
+.clock-section {
+  flex: 0 0 63vh;
+  background-color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 3px solid #333;
+  overflow: hidden;
+}
+
+.clock-time {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 21vw; /* 左右が切れないように少しサイズを調整 */
+  line-height: 1;
+  letter-spacing: -2px; /* 文字同士の間隔を少し詰めて確実に収める */
+  color: #ffffff;
+  /* text-shadow: 0 0 35px rgba(255, 255, 255, 0.5); */
+  white-space: nowrap;
+}
+
+/* 画面下部：選手リスト表示エリア */
+.schedule-section {
+  flex: 1;
+  padding: 2px 15px;
+  background-color: #1e1e1e;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.schedule-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 2px;
+}
+
+.title-area h2 {
+  font-size: 1.1rem;
+  color: #ffcc00;
+  letter-spacing: 2px;
+}
+
+/* テーブル全体 */
+.athlete-table {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  border-collapse: collapse;
+  text-align: center;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.athlete-table thead {
+  flex: 0 0 auto;
+}
+
+.athlete-table tbody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.athlete-table tr {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  border-bottom: 1px solid #333;
+  background-color: #181818;
+}
+
+/* 行の高さの比率 */
+.athlete-table tbody tr:first-child {
+  flex: 1.6; 
+}
+.athlete-table tbody tr:not(:first-child) {
+  flex: 1.0;
+}
+
+.athlete-table th {
+  font-size: 0.9rem;
+  padding: 2px 4px;
+  background-color: #111;
+  color: #aaa;
+  border-bottom: 2px solid #444;
+  text-align: center;
+}
+
+/* 各列の幅配分 */
+.athlete-table th:nth-child(1), .athlete-table td:nth-child(1) { width: 30%; }
+.athlete-table th:nth-child(2), .athlete-table td:nth-child(2) { width: 30%; }
+.athlete-table th:nth-child(3), .athlete-table td:nth-child(3) { width: 40%; }
+
+.athlete-table td {
+  padding: 0 4px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* --- 1行目（次にスタートする選手）の文字サイズをさらに拡大 --- */
+.athlete-table tbody tr:first-child .cat-badge {
+  font-size: 2.6rem; /* バッジを大きく */
+  padding: 4px 22px;
+  border-radius: 8px;
+}
+.athlete-table tbody tr:first-child .bib-col {
+  font-size: 4.8rem; /* Bib番号をさらに大きく迫力ある表示に */
+  color: #fff;
+}
+.athlete-table tbody tr:first-child .time-col {
+  font-size: 5.4rem; /* 予定時刻を限界まで大きく強調 */
+  color: #ffffff;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* --- 2・3行目（後続の選手）のサイズ設定 --- */
+.athlete-table tbody tr:not(:first-child) .cat-badge {
+  font-size: 1.4rem;
+  padding: 2px 10px;
+}
+.athlete-table tbody tr:not(:first-child) .bib-col {
+  font-size: 2.2rem;
+  color: #ddd;
+}
+.athlete-table tbody tr:not(:first-child) .time-col {
+  font-size: 2.5rem;
+  color: #ffffff;
+  font-family: 'Share Tech Mono', monospace;
+}
+
+/* カテゴリーバッジの共通色設定 */
+.cat-badge {
+  display: inline-block;
+  border-radius: 6px;
+  background: #eee;
+  color: #333;
+}
+.cat-mk1 { background-color: #007bff !important; color: white !important; }
+.cat-wk1 { background-color: #a333c8 !important; color: white !important; }
+.cat-mc1 { background-color: #5bc0de !important; color: black !important; }
+.cat-wc1 { background-color: #f0ad4e !important; color: black !important; }
