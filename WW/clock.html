@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>スタート時計 & 次発艇モニター</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Noto+Sans+JP:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style-clock.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- 上部：時計表示エリア（画面の約50%） -->
+    <header class="clock-section">
+      <div class="clock-time" id="clockTime">00:00:00</div>
+    </header>
+
+    <!-- 下部：スタート待機選手エリア -->
+    <main class="schedule-section">
+      <div class="schedule-header">
+        <div class="title-area">
+          <h2>次発艇予定 (NEXT START)</h2>
+        </div>
+      </div>
+
+      <table class="athlete-table">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Bib</th>
+            <th>予定時刻</th>
+          </tr>
+        </thead>
+        <tbody id="athleteList">
+          <!-- JSで動的描画 -->
+        </tbody>
+      </table>
+    </main>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="clock.js"></script>
+</body>
+</html>

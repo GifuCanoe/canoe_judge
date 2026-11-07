@@ -152,8 +152,8 @@ h1 { font-size: 1.1rem; margin: 4px 0; }
 
 .cat-mk1 { background-color: #007bff !important; color: white !important; }
 .cat-wk1 { background-color: #a333c8 !important; color: white !important; }
-.cat-mc1 { background-color: #5bc0de !important; color: black !important; }
-.cat-wc1 { background-color: #f0ad4e !important; color: black !important; }
+.cat-drm { background-color: #5bc0de !important; color: black !important; }
+.cat-drw { background-color: #f0ad4e !important; color: black !important; }
 
 /* --- 下部操作エリア --- */
 #start-buttons { 
