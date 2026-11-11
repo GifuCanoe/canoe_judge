@@ -6,7 +6,102 @@ document.addEventListener('DOMContentLoaded', () => {
   const clockElement = document.getElementById("clockTime");
   const athleteListElement = document.getElementById("athleteList");
 
-  // 日付文字列から秒数への変換（ローカル時間 JST として解釈）
+  // ==========================================
+  // 【音声（Web Audio API）関連の処理】
+  // ==========================================
+  let audioCtx = null;
+
+  function initAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
+  }
+
+  // ブラウザの自動再生ブロック対策
+  window.addEventListener('click', initAudio, { once: true });
+  window.addEventListener('keydown', initAudio, { once: true });
+
+  // 物理ブザー風の音を発生させる関数（Type2仕様）
+  function playBeep(type, isFinal = false) {
+    if (!audioCtx) return;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    // 矩形波 (square) で太いブザー音を再現
+    osc.type = 'square';
+    
+    // 0秒のときは1000Hzの高音＆長め、それ以外は500Hz
+    const freq = isFinal ? 1000 : 500; 
+    const duration = type === '10sec' ? 0.6 : (isFinal ? 0.8 : 0.3);
+
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+    // 音の立ち上がりと消え方を調整してパキッとしたブザー音にする
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime + duration - 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + duration);
+  }
+
+  // 最後に音を鳴らした時刻キーを記憶（重複鳴り防止）
+  let lastPlayedKey = "";
+
+  // カウントダウン音の判定処理（1秒早いズレを+1000msで補正）
+  function checkCountdownSound(athletes) {
+    if (!athletes || athletes.length === 0) return;
+    
+    const nextAthlete = athletes[0];
+    if (!nextAthlete || !nextAthlete.timeStr) return;
+
+    const now = new Date();
+    const timeParts = nextAthlete.timeStr.split(':');
+    if (timeParts.length < 2) return;
+
+    const targetTime = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate(),
+      parseInt(timeParts[0], 10),
+      parseInt(timeParts[1], 10),
+      parseInt(timeParts[2] || 0, 10)
+    );
+
+    // 1秒のズレ補正
+    const diffMs = (targetTime.getTime() - now.getTime()) + 1000;
+    
+    if (diffMs < -100) return;
+
+    const diffSec = Math.floor(diffMs / 1000);
+
+    const playKey = `${nextAthlete.bib}_${nextAthlete.timeStr}_${diffSec}`;
+    if (lastPlayedKey === playKey) return;
+
+    // カウントダウン音の鳴り分け
+    if (diffSec === 10) {
+      playBeep('10sec', false);
+      lastPlayedKey = playKey;
+    } else if (diffSec >= 1 && diffSec <= 5) {
+      playBeep('count', false);
+      lastPlayedKey = playKey;
+    } else if (diffSec === 0) {
+      playBeep('final', true);
+      lastPlayedKey = playKey;
+    }
+  }
+
+  // ==========================================
+  // 【データ取得・描画関連】
+  // ==========================================
+
   function timeStringToSeconds(timeStr) {
     if (!timeStr) return null;
     let timeString = String(timeStr).trim();
@@ -26,7 +121,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return parts[0] * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
   }
 
-  // 表示用時刻フォーマット（ローカル時間で整形）
   function formatTimeString(timeStr) {
     if (!timeStr) return '';
     let timeString = String(timeStr).trim();
@@ -43,7 +137,6 @@ document.addEventListener('DOMContentLoaded', () => {
     return timeString;
   }
 
-  // GASから「表示」シートの名簿データ取得
   async function fetchRoster() {
     try {
       const res = await fetch(`${APP_CONFIG.GAS_URL}?round=${encodeURIComponent(TARGET_SHEET_NAME)}`);
@@ -68,33 +161,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // リストのフィルタリングと描画更新
   function updateDisplay() {
     const now = new Date();
     const currentSeconds = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
 
     const upcoming = allData.filter(item => {
-      if (item.seconds === null) return true; // アナウンス行（時刻なし）はそのまま残す
+      if (item.seconds === null) return true;
       return item.seconds >= currentSeconds;
     });
 
     const displayAthletes = upcoming.slice(0, MAX_DISPLAY);
+    
     renderTable(displayAthletes);
+    checkCountdownSound(displayAthletes);
   }
 
-  // メインループ
   function updateApp() {
     const now = new Date();
     
-    // 1. 時計表示更新
     const hour = String(now.getHours()).padStart(2, "0");
     const min = String(now.getMinutes()).padStart(2, "0");
     const sec = String(now.getSeconds()).padStart(2, "0");
     clockElement.innerText = `${hour}:${min}:${sec}`;
 
-    // 2. リスト状態監視更新
     updateDisplay();
-
     requestAnimationFrame(updateApp);
   }
 
@@ -133,12 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
     athleteListElement.innerHTML = html;
   }
 
-  // 初回データ取得
   fetchRoster();
-
-  // 30秒ごとの自動データ同期
   setInterval(() => fetchRoster(), 30000);
-
-  // 時計更新ループ起動
   updateApp();
 });
