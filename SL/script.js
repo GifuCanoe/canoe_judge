@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentInputArrayIndex = 0; 
     let currentInputCellIndex = 2; 
     let currentRound = ""; 
+    let syncTimer = null; // 自動同期用タイマー
 
     // --- 音声処理 ---
     const sounds = {
@@ -176,7 +177,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         renderArrays(true);
         saveToLocalStorage(); // 入力ごとに保存
+        // 即時送信を試みる
         syncToGoogleSheets();
+
+        // 【追加】最後の入力後や通信が中断された場合の保険として、
+        // 入力停止から1.5秒後に自動で最新データを再送する（最終確定用）
+        if (syncTimer) clearTimeout(syncTimer);
+        syncTimer = setTimeout(() => {
+            syncToGoogleSheets();
+        }, 1500);
     }
 
     function renderArrays(shouldScroll = false) {
