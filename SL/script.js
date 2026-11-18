@@ -163,11 +163,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- 入力・表示 ---
-    function inputData(num) {
+    function inputData(valueStr) {
         if (allData.length === 0) return;
-        allData[currentInputArrayIndex][currentInputCellIndex] = num;
-        if (num !== null) {
-            playSound(num);
+        allData[currentInputArrayIndex][currentInputCellIndex] = valueStr;
+        if (valueStr !== null) {
+            // 「2?」のような文字列から数値部分を取り出して音を鳴らす
+            const baseNum = parseInt(valueStr);
+            playSound(baseNum);
             if (currentInputCellIndex < TOTAL_CELLS_IN_ARRAY - 1) {
                 currentInputCellIndex++;
             } else if (currentInputArrayIndex < TOTAL_ARRAYS - 1) {
@@ -211,9 +213,18 @@ document.addEventListener('DOMContentLoaded', () => {
                         else if (cat.includes('WC1')) cell.classList.add('cat-wc1');
                     }
                 } else {
-                    cell.textContent = allData[i][j] !== null ? allData[i][j] : '';
-                    if (allData[i][j] === 2) cell.classList.add('is-two');
-                    if (allData[i][j] === 50) cell.classList.add('is-fifty');
+                    const val = allData[i][j];
+                    cell.textContent = val !== null ? val : '';
+                    
+                    // 「2」または「2?」の場合
+                    if (val === 2 || val === "2" || (typeof val === 'string' && val.startsWith('2'))) {
+                        cell.classList.add('is-two');
+                    }
+                    // 「50」または「50?」の場合
+                    if (val === 50 || val === "50" || (typeof val === 'string' && val.startsWith('50'))) {
+                        cell.classList.add('is-fifty');
+                    }
+
                     if (i === currentInputArrayIndex && j === currentInputCellIndex) cell.classList.add('cell-highlight');
                     cell.onclick = () => { 
                         currentInputArrayIndex = i; 
@@ -259,8 +270,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.querySelectorAll('.number-btn').forEach(btn => {
-        btn.onclick = () => inputData(parseInt(btn.dataset.value));
+        const val = btn.dataset.value; // "0", "2", "50"
+        let pressTimer = null;
+        let isLongPress = false;
+
+        const startAction = (e) => {
+            e.preventDefault();
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+                isLongPress = true;
+                // 0.6秒（600ms）以上長押しされた場合：「?」付きで入力
+                inputData(val + "?"); 
+                // 対応端末であればバイブレーションでお知らせ
+                if (navigator.vibrate) navigator.vibrate(50); 
+            }, 600);
+        };
+
+        const endAction = (e) => {
+            e.preventDefault();
+            if (pressTimer) clearTimeout(pressTimer);
+            
+            // 長押しでなければ通常のタップとして数値で入力
+            if (!isLongPress) {
+                inputData(parseInt(val));
+            }
+        };
+
+        btn.addEventListener('mousedown', startAction);
+        btn.addEventListener('mouseup', endAction);
+        btn.addEventListener('touchstart', startAction);
+        btn.addEventListener('touchend', endAction);
     });
+    //ここまで長押しで変更
     clearBtn.onclick = () => inputData(null);
 
     // 初期化：設定適用とバックアップチェック
